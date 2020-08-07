@@ -1,30 +1,62 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/jedib0t/go-pretty/table"
+	ptable "github.com/jedib0t/go-pretty/table"
+	"github.com/jedib0t/go-pretty/text"
 )
 
 func main() {
-	fmt.Println("Hellooooo")
-	bytes, err := ioutil.ReadAll(os.Stdin)
+	csvRaw := readFromStdin()
 
-	log.Println(err, string(bytes))
+	table := createTable()
+
+	csvReader := createCSVReader(csvRaw)
+
+	for {
+		csvRow, err := csvReader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+			continue
+		}
+		tableRow := make([]interface{}, len(csvRow))
+		for i := range tableRow {
+			tableRow[i] = csvRow[i]
+		}
+		table.AppendRow(tableRow)
+
+	}
+
+	fmt.Println(table.Render())
+
+}
+
+func readFromStdin() string {
+	bytes, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		fmt.Println("Failed to read stdin")
+		os.Exit(1)
+	}
+	return string(bytes)
+
+}
+
+func createTable() ptable.Writer {
 	t := table.NewWriter()
 	// a row need not be just strings
-	t.AppendRow(table.Row{1, "Arya", "Stark", 3000})
-	// all rows need not have the same number of columns
-	t.AppendRow(table.Row{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"})
-	// table.Row is just a shorthand for []interface{}
-	t.AppendRow([]interface{}{300, "Tyrion", "Lannister", 5000})
-	// time to take a peek
 	t.SetCaption("Simple Table with 3 Rows.\n")
-	t.SetStyle(table.StyleDouble)
+	t.SetStyle(table.StyleLight)
 	t.Style().Format = table.FormatOptions{
 		Footer: text.FormatLower,
 		Header: text.FormatLower,
@@ -35,6 +67,12 @@ func main() {
 	t.Style().Options.SeparateFooter = true
 	t.Style().Options.SeparateHeader = true
 	t.SetCaption("Table using the style 'funkyStyle'.\n")
-	fmt.Println(t.Render())
+	return t
+}
 
+func createCSVReader(input string) *csv.Reader {
+	r := csv.NewReader(strings.NewReader(input))
+	r.FieldsPerRecord = -1
+	r.TrimLeadingSpace = true
+	return r
 }
