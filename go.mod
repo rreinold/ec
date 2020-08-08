@@ -1,4 +1,4 @@
-module ecsv
+module ec
 
 go 1.14
 

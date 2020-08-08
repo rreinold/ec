@@ -15,10 +15,9 @@ import (
 )
 
 func main() {
+
 	csvRaw := readFromStdin()
-
 	table := createTable()
-
 	csvReader := createCSVReader(csvRaw)
 
 	for {
@@ -43,6 +42,11 @@ func main() {
 }
 
 func readFromStdin() string {
+
+	if !StdInHasData() {
+		fmt.Println("No data piped.")
+		return ""
+	}
 	bytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		fmt.Println("Failed to read stdin")
@@ -54,7 +58,6 @@ func readFromStdin() string {
 
 func createTable() ptable.Writer {
 	t := table.NewWriter()
-	// a row need not be just strings
 	t.SetCaption("Simple Table with 3 Rows.\n")
 	t.SetStyle(table.StyleLight)
 	t.Style().Format = table.FormatOptions{
@@ -75,4 +78,20 @@ func createCSVReader(input string) *csv.Reader {
 	r.FieldsPerRecord = -1
 	r.TrimLeadingSpace = true
 	return r
+}
+
+func StdInHasData() bool {
+	file := os.Stdin
+	fi, err := file.Stat()
+
+	if err != nil {
+		fmt.Println("file.Stat()", err)
+		return false
+	}
+	size := fi.Size()
+	if size <= 1 {
+		fmt.Println("Stdin is empty")
+		return false
+	}
+	return true
 }
