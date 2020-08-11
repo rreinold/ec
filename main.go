@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,13 +16,37 @@ import (
 )
 
 func main() {
+	var csvFilepath = flag.String("f", "", "filename")
 
-	csvRaw := readFromStdin()
+	flag.Parse()
+	fmt.Println(*csvFilepath)
+
+	table := read(*csvFilepath)
+	fmt.Println(table.Render())
+
+}
+
+func read(path string) ptable.Writer {
+	var r *csv.Reader
+
+	if path != "" {
+		file, OSErr := os.Open(path)
+		if OSErr != nil {
+			// TODO Throw
+			log.Fatalln("Couldn't open the csv file", OSErr)
+			r = csv.NewReader(file)
+		}
+	} else {
+		stdin := readFromStdin()
+		input := strings.NewReader(stdin)
+		r = csv.NewReader(input)
+
+	}
+	r = configureCSVReader(r)
+
 	table := createTable()
-	csvReader := createCSVReader(csvRaw)
-
 	for {
-		csvRow, err := csvReader.Read()
+		csvRow, err := r.Read()
 		if err == io.EOF {
 			break
 		}
@@ -36,8 +61,7 @@ func main() {
 		table.AppendRow(tableRow)
 
 	}
-
-	fmt.Println(table.Render())
+	return table
 
 }
 
@@ -58,7 +82,6 @@ func readFromStdin() string {
 
 func createTable() ptable.Writer {
 	t := table.NewWriter()
-	t.SetCaption("Simple Table with 3 Rows.\n")
 	t.SetStyle(table.StyleLight)
 	t.Style().Format = table.FormatOptions{
 		Footer: text.FormatLower,
@@ -69,12 +92,13 @@ func createTable() ptable.Writer {
 	t.Style().Options.SeparateColumns = true
 	t.Style().Options.SeparateFooter = true
 	t.Style().Options.SeparateHeader = true
-	t.SetCaption("Table using the style 'funkyStyle'.\n")
+	t.SetCaption("Table name'.\n")
 	return t
 }
 
-func createCSVReader(input string) *csv.Reader {
-	r := csv.NewReader(strings.NewReader(input))
+func configureCSVReader(r *csv.Reader) *csv.Reader {
+
+	// Enable variable number of columns per entry
 	r.FieldsPerRecord = -1
 	r.TrimLeadingSpace = true
 	return r
