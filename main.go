@@ -19,7 +19,7 @@ func main() {
 	var csvFilepath = flag.String("f", "", "filename")
 
 	flag.Parse()
-	fmt.Println(*csvFilepath)
+	fmt.Println("Loading: ", *csvFilepath)
 
 	table := read(*csvFilepath)
 	fmt.Println(table.Render())
@@ -32,17 +32,20 @@ func read(path string) ptable.Writer {
 	if path != "" {
 		file, OSErr := os.Open(path)
 		if OSErr != nil {
-			// TODO Throw
-			log.Fatalln("Couldn't open the csv file", OSErr)
-			r = csv.NewReader(file)
-		}
+			fmt.Println("Unable to open file: ",path, OSErr)
+			return nil
+		} 
+		r = csv.NewReader(file)
 	} else {
 		stdin := readFromStdin()
 		input := strings.NewReader(stdin)
 		r = csv.NewReader(input)
 
 	}
+
 	r = configureCSVReader(r)
+	r.FieldsPerRecord = -1
+	r.TrimLeadingSpace = true
 
 	table := createTable()
 	for {
@@ -92,16 +95,15 @@ func createTable() ptable.Writer {
 	t.Style().Options.SeparateColumns = true
 	t.Style().Options.SeparateFooter = true
 	t.Style().Options.SeparateHeader = true
-	t.SetCaption("Table name'.\n")
 	return t
 }
 
 func configureCSVReader(r *csv.Reader) *csv.Reader {
 
-	// Enable variable number of columns per entry
-	r.FieldsPerRecord = -1
-	r.TrimLeadingSpace = true
-	return r
+       // Enable variable number of columns per entry
+       r.FieldsPerRecord = -1
+       r.TrimLeadingSpace = true
+       return r
 }
 
 func StdInHasData() bool {
