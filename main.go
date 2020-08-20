@@ -16,12 +16,11 @@ import (
 )
 
 func main() {
-	var csvFilepath = flag.String("f", "", "filename")
-
+	var filepath = flag.String("f", "", "filename")
 	flag.Parse()
-	fmt.Println("Loading: ", *csvFilepath)
+	fmt.Println("Loading: ", *filepath)
 
-	table := read(*csvFilepath)
+	table := read(*filepath)
 	fmt.Println(table.Render())
 
 }
@@ -32,9 +31,9 @@ func read(path string) ptable.Writer {
 	if path != "" {
 		file, OSErr := os.Open(path)
 		if OSErr != nil {
-			fmt.Println("Unable to open file: ",path, OSErr)
+			fmt.Println("Unable to open file: ", path, OSErr)
 			return nil
-		} 
+		}
 		r = csv.NewReader(file)
 	} else {
 		stdin := readFromStdin()
@@ -100,10 +99,10 @@ func createTable() ptable.Writer {
 
 func configureCSVReader(r *csv.Reader) *csv.Reader {
 
-       // Enable variable number of columns per entry
-       r.FieldsPerRecord = -1
-       r.TrimLeadingSpace = true
-       return r
+	// Enable variable number of columns per entry
+	r.FieldsPerRecord = -1
+	r.TrimLeadingSpace = true
+	return r
 }
 
 func StdInHasData() bool {
