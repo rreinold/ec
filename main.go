@@ -16,23 +16,31 @@ import (
 )
 
 func main() {
-	var filepath = flag.String("f", "", "filename")
-	flag.Parse()
-	fmt.Println("Loading: ", *filepath)
+	var filepath *string
+	if len(os.Args) == 2 {
+		filepath = &os.Args[1]
+	} else {
+		filepath = flag.String("f", "", "filename")
 
-	table := read(*filepath)
+	}
+	flag.Parse()
+
+	table, err := read(*filepath)
+	if err != nil {
+		return
+	}
 	fmt.Println(table.Render())
 
 }
 
-func read(path string) ptable.Writer {
+func read(path string) (ptable.Writer, error) {
 	var r *csv.Reader
 
 	if path != "" {
 		file, OSErr := os.Open(path)
 		if OSErr != nil {
-			fmt.Println("Unable to open file: ", path, OSErr)
-			return nil
+			fmt.Println(OSErr)
+			return nil, OSErr
 		}
 		r = csv.NewReader(file)
 	} else {
@@ -63,7 +71,7 @@ func read(path string) ptable.Writer {
 		table.AppendRow(tableRow)
 
 	}
-	return table
+	return table, nil
 
 }
 
