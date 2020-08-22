@@ -9,7 +9,7 @@ GNU-like terminal tool for rendering CSV files
 ## 1. Parameter
 
 ```bash
-$ ec -f my_data.csv
+$ ec my_data.csv
 
 ┌─────┬─────┬─────┐
 │ ABC │ DEF │ GHJ │
@@ -46,8 +46,12 @@ echo "great,row,full,of,goodies\nboring,row,that,i,dislike" | grep great | ec
 ```bash
 $ ec --help
 Usage of ec:
+  $1 string
+        filename
+	ec my_csv.csv
   -f string
         filename
+	ec -f my_csv.csv
 ```
 
 # Roadmap
