@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Lightweight terminal tool for rendering CSV files
+GNU-like terminal tool for rendering CSV files
 
 ## Usage
 
@@ -29,7 +29,7 @@ $ echo abc,def,ghj | ec
 
 ```
 
-# Help
+## Help
 
 ```
 $ ec --help
