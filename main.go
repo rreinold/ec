@@ -96,7 +96,6 @@ func createTable() ptable.Writer {
 	t.Style().Format = table.FormatOptions{
 		Footer: text.FormatLower,
 		Header: text.FormatLower,
-		Row:    text.FormatUpper,
 	}
 	t.Style().Options.DrawBorder = true
 	t.Style().Options.SeparateColumns = true
